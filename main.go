@@ -1,29 +1,26 @@
 package main
 
 import (
-	"time"
 
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/widget"
+    "fyne.io/fyne/v2"
+    "fyne.io/fyne/v2/app"
+    "fyne.io/fyne/v2/widget"
+    "fyne.io/fyne/v2/container"
+    "clothing_manager/models"
 )
 
-func updateTime(clock *widget.Label) {
-	formatted := time.Now().Format("Time: 03:04:05")
-	clock.SetText(formatted)
-}
-
 func main() {
-	a := app.New()
-	w := a.NewWindow("Clock")
+    a := app.New()
+    w := a.NewWindow("TODO App")
 
-	clock := widget.NewLabel("")
-	updateTime(clock)
+        // ADDING THIS HERE
+    w.Resize(fyne.NewSize(300, 400))
+    t := models.NewTodo("Show this on the window")
 
-	w.SetContent(clock)
-	go func() {
-		for range time.Tick(time.Second) {
-			updateTime(clock)
-		}
-	}()
-	w.ShowAndRun()
+    w.SetContent(
+        container.NewCenter(
+            widget.NewLabel(t.String()),
+        ),
+    )
+    w.ShowAndRun()
 }
