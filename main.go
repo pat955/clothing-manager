@@ -2,8 +2,6 @@ package main
 
 import (
 	"clothing_manager/models"
-	"fmt"
-	"os"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -16,32 +14,8 @@ func main() {
 	w := a.NewWindow("TODO App")
 
 	w.Resize(fyne.NewSize(300, 400))
-
-	newtodoDescTxt := widget.NewEntry()
-	newtodoDescTxt.PlaceHolder = "New Todo Description..."
-	addBtn := widget.NewButton("Add", addTodo("hello"))
-	addBtn.Disable()
-
-	newtodoDescTxt.OnChanged = func(s string) {
-		addBtn.Disable()
-
-		if len(s) >= 3 {
-			addBtn.Enable()
-		}
-	}
-
-	addButtonArea := container.NewBorder(
-		nil,            // TOP
-		nil,            // BOTTOM
-		nil,            // LEFT
-		addBtn,         // RIGHT
-		newtodoDescTxt, // REST
-	)
-
 	data := []models.Todo{
 		models.NewTodo("Some stuff"),
-		models.NewTodo("Some more stuff"),
-		models.NewTodo("Some other things"),
 	}
 
 	todoList := widget.NewList(
@@ -71,6 +45,30 @@ func main() {
 			c.SetChecked(data[i].Done)
 		})
 
+	newtodoDescTxt := widget.NewEntry()
+	newtodoDescTxt.PlaceHolder = "New Todo Description..."
+	addBtn := widget.NewButton("Add", func() {
+		data = append(data, models.NewTodo(newtodoDescTxt.Text))
+		todoList.Refresh()
+	})
+	addBtn.Disable()
+
+	newtodoDescTxt.OnChanged = func(s string) {
+		addBtn.Disable()
+
+		if len(s) >= 3 {
+			addBtn.Enable()
+		}
+	}
+
+	addButtonArea := container.NewBorder(
+		nil,            // TOP
+		nil,            // BOTTOM
+		nil,            // LEFT
+		addBtn,         // RIGHT
+		newtodoDescTxt, // REST
+	)
+
 	w.SetContent(
 		container.NewBorder(
 			nil,           // TOP
@@ -82,23 +80,4 @@ func main() {
 		),
 	)
 	w.ShowAndRun()
-}
-
-func addTodo(str string) {
-	strByte := []byte(str)
-	//jsondata := fmt.Sprintf(`{%s: %b}`, str, false)
-	f, err := os.OpenFile("./data.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer f.Close()
-	n, err := f.Write(strByte)
-	if err != nil {
-		fmt.Println(n, err)
-	}
-
-	if n, err = f.WriteString("\n"); err != nil {
-		fmt.Println(n, err)
-	}
 }
