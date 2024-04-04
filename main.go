@@ -2,6 +2,8 @@ package main
 
 import (
 	"clothing_manager/models"
+	"fmt"
+	"os"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -49,7 +51,9 @@ func main() {
 	newtodoDescTxt.PlaceHolder = "New Todo Description..."
 
 	addBtn := widget.NewButton("Add", func() {
-		data = append(data, models.NewTodo(newtodoDescTxt.Text))
+		addedTodo := models.NewTodo(newtodoDescTxt.Text)
+		updateDataFile(addedTodo)
+		data = append(data, addedTodo)
 		todoList.Refresh()
 		newtodoDescTxt.Text = ""
 		newtodoDescTxt.Refresh()
@@ -61,7 +65,9 @@ func main() {
 		if addBtn.Disabled() {
 			return
 		}
-		data = append(data, models.NewTodo(newtodoDescTxt.Text))
+		addedTodo := models.NewTodo(newtodoDescTxt.Text)
+		updateDataFile(addedTodo)
+		data = append(data, addedTodo)
 		todoList.Refresh()
 		newtodoDescTxt.Text = ""
 		newtodoDescTxt.Refresh()
@@ -95,4 +101,13 @@ func main() {
 		),
 	)
 	w.ShowAndRun()
+}
+
+func updateDataFile(newData models.Todo) {
+	f, err := os.OpenFile("data.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer f.Close()
+	f.WriteString(newData.String() + "\n")
 }
