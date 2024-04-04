@@ -47,11 +47,26 @@ func main() {
 
 	newtodoDescTxt := widget.NewEntry()
 	newtodoDescTxt.PlaceHolder = "New Todo Description..."
+
 	addBtn := widget.NewButton("Add", func() {
 		data = append(data, models.NewTodo(newtodoDescTxt.Text))
 		todoList.Refresh()
+		newtodoDescTxt.Text = ""
+		newtodoDescTxt.Refresh()
+		newtodoDescTxt.OnChanged(newtodoDescTxt.Text)
 	})
 	addBtn.Disable()
+
+	newtodoDescTxt.OnSubmitted = func(s string) {
+		if addBtn.Disabled() {
+			return
+		}
+		data = append(data, models.NewTodo(newtodoDescTxt.Text))
+		todoList.Refresh()
+		newtodoDescTxt.Text = ""
+		newtodoDescTxt.Refresh()
+		newtodoDescTxt.OnChanged(newtodoDescTxt.Text)
+	}
 
 	newtodoDescTxt.OnChanged = func(s string) {
 		addBtn.Disable()
