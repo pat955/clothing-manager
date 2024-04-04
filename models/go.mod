@@ -1,3 +1,3 @@
 module clothing_manager/models
 
-go 1.18.0
+go 1.18

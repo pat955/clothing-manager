@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"clothing_manager/models"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -16,9 +18,7 @@ func main() {
 	w := a.NewWindow("TODO App")
 
 	w.Resize(fyne.NewSize(300, 400))
-	data := []models.Todo{
-		models.NewTodo("Some stuff"),
-	}
+	data := readDataFile()
 
 	todoList := widget.NewList(
 		// func that returns the number of items in the list
@@ -95,15 +95,6 @@ func main() {
 	w.ShowAndRun()
 }
 
-func updateDataFile(newData models.Todo) {
-	f, err := os.OpenFile("data.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer f.Close()
-	f.WriteString(newData.String() + "\n")
-}
-
 func addBtnFunc(data []models.Todo, entry *widget.Entry) []models.Todo {
 	addedTodo := models.NewTodo(entry.Text)
 	updateDataFile(addedTodo)
@@ -111,4 +102,40 @@ func addBtnFunc(data []models.Todo, entry *widget.Entry) []models.Todo {
 	entry.Text = ""
 	entry.OnChanged(entry.Text)
 	return data
+}
+
+func updateDataFile(newData models.Todo) {
+	f, err := os.OpenFile("data.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return
+	}
+	defer f.Close()
+	bytes := newData.JSON()
+	f.Write(append(bytes, 10))
+}
+
+func readDataFile() []models.Todo {
+	file, err := os.Open("data.json")
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return nil
+	}
+	defer file.Close()
+
+	var todos []models.Todo
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		var todo models.Todo
+		if err := json.Unmarshal(scanner.Bytes(), &todo); err != nil {
+			fmt.Println("Error parsing JSON:", err)
+			continue
+		}
+		todos = append(todos, todo)
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Println("Error reading file:", err)
+	}
+	return todos
 }
