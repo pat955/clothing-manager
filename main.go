@@ -51,13 +51,9 @@ func main() {
 	newtodoDescTxt.PlaceHolder = "New Todo Description..."
 
 	addBtn := widget.NewButton("Add", func() {
-		addedTodo := models.NewTodo(newtodoDescTxt.Text)
-		updateDataFile(addedTodo)
-		data = append(data, addedTodo)
-		todoList.Refresh()
-		newtodoDescTxt.Text = ""
+		data = addBtnFunc(data, newtodoDescTxt)
 		newtodoDescTxt.Refresh()
-		newtodoDescTxt.OnChanged(newtodoDescTxt.Text)
+		todoList.Refresh()
 	})
 	addBtn.Disable()
 
@@ -65,13 +61,9 @@ func main() {
 		if addBtn.Disabled() {
 			return
 		}
-		addedTodo := models.NewTodo(newtodoDescTxt.Text)
-		updateDataFile(addedTodo)
-		data = append(data, addedTodo)
-		todoList.Refresh()
-		newtodoDescTxt.Text = ""
+		data = addBtnFunc(data, newtodoDescTxt)
 		newtodoDescTxt.Refresh()
-		newtodoDescTxt.OnChanged(newtodoDescTxt.Text)
+		todoList.Refresh()
 	}
 
 	newtodoDescTxt.OnChanged = func(s string) {
@@ -110,4 +102,13 @@ func updateDataFile(newData models.Todo) {
 	}
 	defer f.Close()
 	f.WriteString(newData.String() + "\n")
+}
+
+func addBtnFunc(data []models.Todo, entry *widget.Entry) []models.Todo {
+	addedTodo := models.NewTodo(entry.Text)
+	updateDataFile(addedTodo)
+	data = append(data, addedTodo)
+	entry.Text = ""
+	entry.OnChanged(entry.Text)
+	return data
 }
