@@ -18,8 +18,8 @@ func NewItem(typ, color, description string) ClothingItem {
 func (c ClothingItem) String() string {
 	return fmt.Sprintf("%s - %s - %t", c.Color, c.Description, c.Fav)
 }
-func (c ClothingItem) JSON() []byte {
-	b, err := json.Marshal(c)
+func (t ClothingItem) JSON() []byte {
+	b, err := json.Marshal(t)
 	if err != nil {
 		fmt.Println(err)
 	}

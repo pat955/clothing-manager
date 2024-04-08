@@ -145,7 +145,7 @@ func readDataFile() []models.ClothingItem {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		var item models.ClothingItem
-		if err := json.Unmarshal(scanner.Bytes(), &items); err != nil {
+		if err := json.Unmarshal(scanner.Bytes(), &item); err != nil {
 			fmt.Println("Error parsing JSON:", err)
 			continue
 		}
