@@ -20,7 +20,7 @@ func main() {
 	w.Resize(fyne.NewSize(300, 400))
 	data := readDataFile()
 
-	todoList := widget.NewList(
+	clotingList := widget.NewList(
 		// func that returns the number of items in the list
 		func() int {
 			return len(data)
@@ -28,7 +28,8 @@ func main() {
 		// func that returns the component structure of the List Item
 		func() fyne.CanvasObject {
 			return container.NewBorder(
-				nil, nil, nil,
+				nil, nil,
+				widget.NewLabel(""),
 				// left of the border
 				widget.NewCheck("", func(b bool) {}),
 				// takes the rest of the space
@@ -42,18 +43,20 @@ func main() {
 			// ideally we should check `ok` for each one of those casting
 			// but we know that they are those types for sure
 			l := ctr.Objects[0].(*widget.Label)
-			c := ctr.Objects[1].(*widget.Check)
+			l2 := ctr.Objects[1].(*widget.Label)
+			c := ctr.Objects[2].(*widget.Check)
 			l.SetText(data[i].Description)
-			c.SetChecked(data[i].Done)
+			l2.SetText(data[i].Color)
+			c.SetChecked(data[i].Fav)
 		})
 
 	newtodoDescTxt := widget.NewEntry()
-	newtodoDescTxt.PlaceHolder = "New Todo Description..."
+	newtodoDescTxt.PlaceHolder = "New Clothing Item Description..."
 
 	addBtn := widget.NewButton("Add", func() {
 		data = addBtnFunc(data, newtodoDescTxt)
 		newtodoDescTxt.Refresh()
-		todoList.Refresh()
+		clotingList.Refresh()
 	})
 	addBtn.Disable()
 
@@ -63,7 +66,7 @@ func main() {
 		}
 		data = addBtnFunc(data, newtodoDescTxt)
 		newtodoDescTxt.Refresh()
-		todoList.Refresh()
+		clotingList.Refresh()
 	}
 
 	newtodoDescTxt.OnChanged = func(s string) {
@@ -89,14 +92,14 @@ func main() {
 			nil,           // RIGHT
 			nil,           // LEFT
 			// the rest will take all the rest of the space
-			todoList,
+			clotingList,
 		),
 	)
 	w.ShowAndRun()
 }
 
-func addBtnFunc(data []models.Todo, entry *widget.Entry) []models.Todo {
-	addedTodo := models.NewTodo(entry.Text)
+func addBtnFunc(data []models.ClothingItem, entry *widget.Entry) []models.ClothingItem {
+	addedTodo := models.NewItem("", entry.Text)
 	updateDataFile(addedTodo)
 	data = append(data, addedTodo)
 	entry.Text = ""
@@ -104,7 +107,7 @@ func addBtnFunc(data []models.Todo, entry *widget.Entry) []models.Todo {
 	return data
 }
 
-func updateDataFile(newData models.Todo) {
+func updateDataFile(newData models.ClothingItem) {
 	f, err := os.OpenFile("data.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -115,7 +118,7 @@ func updateDataFile(newData models.Todo) {
 	f.Write(append(bytes, 10))
 }
 
-func readDataFile() []models.Todo {
+func readDataFile() []models.ClothingItem {
 	file, err := os.Open("data.json")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -123,19 +126,19 @@ func readDataFile() []models.Todo {
 	}
 	defer file.Close()
 
-	var todos []models.Todo
+	var items []models.ClothingItem
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		var todo models.Todo
-		if err := json.Unmarshal(scanner.Bytes(), &todo); err != nil {
+		var item models.ClothingItem
+		if err := json.Unmarshal([]byte(scanner.Text()), &items); err != nil {
 			fmt.Println("Error parsing JSON:", err)
 			continue
 		}
-		todos = append(todos, todo)
+		items = append(items, item)
 	}
 
 	if err := scanner.Err(); err != nil {
 		fmt.Println("Error reading file:", err)
 	}
-	return todos
+	return items
 }
