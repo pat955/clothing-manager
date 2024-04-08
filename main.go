@@ -29,25 +29,39 @@ func main() {
 		func() fyne.CanvasObject {
 			return container.NewBorder(
 				nil, nil,
-				widget.NewLabel(""),
-				// left of the border
-				widget.NewCheck("", func(b bool) {}),
+				container.NewBorder(
+					widget.NewLabel(""), widget.NewLabel(""),
+					nil, nil,
+				),
+				nil,
+				container.NewBorder(
+					nil, nil, widget.NewLabel(""),
+
+					widget.NewCheck("", func(b bool) {}),
+				),
+
 				// takes the rest of the space
-				widget.NewLabel(""),
 			)
 		},
 		// func that is called for each item in the list and allows
 		// you to show the content on the previously defined ui structure
 		func(i widget.ListItemID, o fyne.CanvasObject) {
 			ctr, _ := o.(*fyne.Container)
+			leftContainer := ctr.Objects[1].(*fyne.Container)
+			rightContainer := ctr.Objects[0].(*fyne.Container)
 			// ideally we should check `ok` for each one of those casting
 			// but we know that they are those types for sure
-			l := ctr.Objects[0].(*widget.Label)
-			l2 := ctr.Objects[1].(*widget.Label)
-			c := ctr.Objects[2].(*widget.Check)
-			l.SetText(data[i].Description)
-			l2.SetText(data[i].Color)
-			c.SetChecked(data[i].Fav)
+
+			// For changing the layout, the take up rest space are counted as objects FIRST!
+			typeLabel := leftContainer.Objects[0].(*widget.Label)
+			colorLabel := leftContainer.Objects[1].(*widget.Label)
+
+			descLabel := rightContainer.Objects[0].(*widget.Label)
+			favCheck := rightContainer.Objects[1].(*widget.Check)
+			typeLabel.SetText(data[i].Type)
+			descLabel.SetText(data[i].Description)
+			colorLabel.SetText(data[i].Color)
+			favCheck.SetChecked(data[i].Fav)
 		})
 
 	newtodoDescTxt := widget.NewEntry()
@@ -99,8 +113,8 @@ func main() {
 }
 
 func addBtnFunc(data []models.ClothingItem, entry *widget.Entry) []models.ClothingItem {
-	addedTodo := models.NewItem("", entry.Text)
-	updateDataFile(addedTodo)
+	addedTodo := models.NewItem("type", "color", entry.Text)
+	//updateDataFile(addedTodo)
 	data = append(data, addedTodo)
 	entry.Text = ""
 	entry.OnChanged(entry.Text)
@@ -130,7 +144,7 @@ func readDataFile() []models.ClothingItem {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		var item models.ClothingItem
-		if err := json.Unmarshal([]byte(scanner.Text()), &items); err != nil {
+		if err := json.Unmarshal(scanner.Bytes(), &items); err != nil {
 			fmt.Println("Error parsing JSON:", err)
 			continue
 		}
