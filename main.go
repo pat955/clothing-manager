@@ -15,24 +15,24 @@ import (
 
 func main() {
 	a := app.New()
-	w := a.NewWindow("TODO App")
+	w := a.NewWindow("Clothing Manager")
 
 	w.Resize(fyne.NewSize(300, 400))
 	data := readDataFile()
 
 	clotingList := widget.NewList(
 		// func that returns the number of items in the list
-		func() int {
-			return len(data)
-		},
+		func() int { return len(data) },
+
 		// func that returns the component structure of the List Item
 		func() fyne.CanvasObject {
 			return container.NewBorder(
-				nil, nil,
+				nil,
 				container.NewBorder(
-					widget.NewLabel(""), widget.NewLabel(""),
-					nil, nil,
+					nil, nil, widget.NewLabel(""), nil,
+					widget.NewLabel(""),
 				),
+				nil,
 				nil,
 				container.NewBorder(
 					nil, nil, widget.NewLabel(""),
@@ -58,6 +58,7 @@ func main() {
 
 			descLabel := rightContainer.Objects[0].(*widget.Label)
 			favCheck := rightContainer.Objects[1].(*widget.Check)
+
 			typeLabel.SetText(data[i].Type)
 			descLabel.SetText(data[i].Description)
 			colorLabel.SetText(data[i].Color)
@@ -114,7 +115,7 @@ func main() {
 
 func addBtnFunc(data []models.ClothingItem, entry *widget.Entry) []models.ClothingItem {
 	addedTodo := models.NewItem("type", "color", entry.Text)
-	//updateDataFile(addedTodo)
+	updateDataFile(addedTodo)
 	data = append(data, addedTodo)
 	entry.Text = ""
 	entry.OnChanged(entry.Text)
