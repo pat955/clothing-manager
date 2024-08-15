@@ -1,4 +1,4 @@
-# Clothing Manager
+# Pat's Warderobe
 
 ### Idea Behind This Project
 
